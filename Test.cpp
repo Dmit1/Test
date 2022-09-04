@@ -382,8 +382,8 @@ void contact_pass(CUSTOMERS* customers, PASSENGER* passenger, int* row_customers
 void contact_cargo(CUSTOMERS* customers, CARGO* cargo, int* row_customers, int* row_cargo);            // контакты груз
 void cost_prime(CARS* cars, int* row_cars, double*& prime_cost);                                     //стоимость за 1 км
 void cost_renta(CARS* cars, int* row_cars, double* cost_r, double* procent_rent, double* cost_rent);// стоимость аренды в суткам
-void car_driven(CARS* cars, int* row_cars, CARGO* cargo, int* row_cargo, PASSENGER* passenger, int* row_passenger, double& price_distance);
-void price_customers(CARS* cars, int* row_cars, double* prime_cost, double* price_distance);
+void car_driven(CARS* cars, int* row_cars, CARGO* cargo, int* row_cargo, PASSENGER* passenger, int* row_passenger, double *distance);
+void price_customers(CARS* cars, int* row_cars, double* prime_cost, double* distance);
 int main() {
 	setlocale(LC_ALL, "Russian_Russia.1251");
 	SetConsoleCP(1251);
@@ -410,11 +410,11 @@ int main() {
 	CARGO* cargo = new CARGO[*row_cargo];                 // Массив структур - информация о грузоперевозках
 	PASSENGER* passenger = new PASSENGER[*row_passenger]; // Массив структур - информация о пассажироперевозках
 	CARS* cars = new CARS[*row_cars];
-	double* prime_cost = new double[*row_cars] {};     // Себестоимость 1 км авто
+	double* prime_cost = new double[*row_cars] {};     // Себестоимость 1 км одного авто
 	double* cost_r = new double[*row_cars] {};         // Себестоимость аренды в день
 	double* cost_rent = new double[*row_cars] {};      // Стоимость аренды в день
 	double* procent_rent = new double[*row_cars] {};   // Процент прибыли
-	double* price_distance = new double[*row_cars] {};   // Себестоимость заказа
+	double* distance = new double[*row_cars] {};   // Себестоимость заказа
 	int item{};
 	char otvet;
 	// Чтение данных 
@@ -485,11 +485,11 @@ int main() {
 			break;
 		case 13:
 			cout << "Рабочий пробег авто" << endl;
-			car_driven(cars, row_cars, cargo, row_cargo, passenger, row_passenger, *price_distance);
+			car_driven(cars, row_cars, cargo, row_cargo, passenger, row_passenger, distance);
 			break;
 		case 14:
 			cout << "Себестоимость заказов" << endl;
-			price_customers(cars, row_cars, prime_cost, price_distance);
+			price_customers(cars, row_cars, prime_cost, distance);
 			break;
 		}
 		cout << "Вернутся в главное меню? (Y/N)";
@@ -521,8 +521,8 @@ int main() {
 	cost_r = nullptr;
 	delete[] procent_rent;
 	procent_rent = nullptr;
-	delete[] price_distance;
-	price_distance = nullptr;
+	delete[] distance;
+	distance = nullptr;
 	system("pause");
 	return 0;
 }
@@ -849,7 +849,7 @@ void cost_prime(CARS* cars, int* row_cars, double*& prime_cost) {
 void cost_renta(CARS* cars, int* row_cars, double* cost_r, double* procent_rent, double* cost_rent) {
 	double с_inf = 0.1;      // Коэффициент инфляции (10%)
 	double с_Am = 0.2;       // Коэфициент амортизации стоимость на дни использования
-	double с_Prof = 0.6;       // Прибыль. Коэфициент рентабельности (устанавливаемая)
+	double с_Prof = 0.6;     // Прибыль. Коэфициент рентабельности (устанавливаемая)
 	double amort_d = 2492;   // дней эксплуатации
 	cout << setw(10) << "Авто" << setw(20) << "Себестоим.Аренды" << setw(20) << "Стоим.Прибыль"
 		<< setw(20) << "Стоим.Аренды" << endl;
@@ -861,30 +861,30 @@ void cost_renta(CARS* cars, int* row_cars, double* cost_r, double* procent_rent,
 			<< procent_rent[a] << setw(20) << cost_rent[a] << endl;
 	}
 }
-void car_driven(CARS* cars, int* row_cars, CARGO* cargo, int* row_cargo, PASSENGER* passenger, int* row_passenger, double& price_distance) {
+void car_driven(CARS* cars, int* row_cars, CARGO* cargo, int* row_cargo, PASSENGER* passenger, int* row_passenger, double *distance) {
 	double total_km = 0;
 	cout << setw(5) << "id_Cars" << "\t" << " Пробег" << endl;
 	for (int a = 0; a < *row_cars; a++) {
 		double sum_km = 0;
 		for (int p = 0; p < *row_passenger; p++) {
 			if (passenger[p].Get_id_Cars() == cars[a].Get_id_Cars()) {
-				sum_km += passenger[p].Get_Distance();
+				distance[a] += passenger[p].Get_Distance();
 			}
 		}
 		for (int c = 0; c < *row_cargo; c++) {
 			if (cargo[c].Get_id_Cars() == cars[a].Get_id_Cars()) {
-				sum_km += cargo[c].Get_Distance();
+				distance[a] += cargo[c].Get_Distance();
 			}
 		}
-		cout << setw(5) << cars[a].Get_id_Cars() << "\t" << sum_km << endl;
+		cout << setw(5) << cars[a].Get_id_Cars() << "\t" << distance[a] << endl;
 		total_km += sum_km;
 	}
 	cout << "TOTAL = " << total_km << endl;
 }
-void price_customers(CARS* cars, int* row_cars, double* prime_cost, double* price_distance) {
+void price_customers(CARS* cars, int* row_cars, double* prime_cost, double* distance) {
 	cout << setw(5) << "id_Cars" << "\t" << "Model" << "\t" << " Пробег" << "\t" << "Price" << endl;
 	for (int a = 0; a < *row_cars; a++) {
 		cout << setw(5) << cars[a].Get_id_Cars() << "\t" << cars[a].Get_mod_Cars() << "\t" <<
-			price_distance[a] << "\t" << static_cast<int>(price_distance[a] * prime_cost[a]) << endl;
+			distance[a] << "\t" << static_cast<int>(distance[a] * prime_cost[a]) << endl;
 	}
 }
