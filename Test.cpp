@@ -410,11 +410,11 @@ int main() {
 	CARGO* cargo = new CARGO[*row_cargo];                 // Массив структур - информация о грузоперевозках
 	PASSENGER* passenger = new PASSENGER[*row_passenger]; // Массив структур - информация о пассажироперевозках
 	CARS* cars = new CARS[*row_cars];
-	double* prime_cost = new double[*row_cars] {};     // Себестоимость 1 км одного авто
+	double* prime_cost = new double[*row_cars] {};     // Себестоимость 1 км пути каждого авто
 	double* cost_r = new double[*row_cars] {};         // Себестоимость аренды в день
 	double* cost_rent = new double[*row_cars] {};      // Стоимость аренды в день
 	double* procent_rent = new double[*row_cars] {};   // Процент прибыли
-	double* distance = new double[*row_cars] {};   // Себестоимость заказа
+	double* distance = new double[*row_cars] {};       // Дистанция каждого авто
 	int item{};
 	char otvet;
 	// Чтение данных 
